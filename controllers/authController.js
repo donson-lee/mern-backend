@@ -101,4 +101,47 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 /*LOG OUT USER CTRL/FUNCTION ENDS HERE.*/
 
-export { registerUser, loginUser, logoutUser };
+/*CHANGE PASSWORD CTRL/FUNCTION STARTS HERE.*/
+const changePassword = asyncHandler(async (req, res) => {
+  const user = await UserModel.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found.");
+  } else {
+    const { oldPassword, password } = req.body;
+    if (!oldPassword && !password) {
+      res.status(400);
+      throw new Error("Please enter old and new passwords to continue.");
+    }
+    if (!oldPassword) {
+      res.status(400);
+      throw new Error("Please enter old password before changing it");
+    }
+    if (!password) {
+      res.status(400);
+      throw new Error("Please enter your new password ..");
+    }
+    const validPassword = await user.matchPassword(oldPassword);
+
+    if (!user && !validPassword) {
+      res.status(400);
+      throw new Error(
+        "Password not matched. Check to confirm your old password."
+      );
+    } else {
+      user.password = password;
+      await user.save();
+      res.status(200).json({ message: "Password changed successfully." });
+    }
+  }
+});
+/*CHANGE PASSWORD CTRL/FUNCTION ENDS HERE.*/
+
+/*FORGOT PASSWORD CTRL/FUNCTION STARTS HERE.*/
+const forgotPassword = asyncHandler(async (req, res) => {
+  res.send("forgot password?..");
+});
+/*FORGOT PASSWORD CTRL/FUNCTION ENDS HERE.*/
+
+export { registerUser, loginUser, logoutUser, changePassword, forgotPassword };
